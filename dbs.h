@@ -6,9 +6,11 @@ using namespace std;
 class Script{
 private:
 	ifstream* file;	
-	string currentString;
+	string curStr;
 	string term;
 	size_t posTerm;
+	bool checkTermAndCut(void);
+	void changeTerm(void);
 public:
 	string script;
 	bool fetch(void);
