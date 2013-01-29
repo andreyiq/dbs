@@ -1,3 +1,4 @@
 script.sql
 *.o
 dbs
+db.fdb

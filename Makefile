@@ -1,5 +1,5 @@
-dbs: main.o dbs.o
-	g++ -o dbs main.o dbs.o
+dbs: main.o dbs.o 
+	g++ -o dbs main.o dbs.o -libpp
 
 main.o: main.c
 	g++ -c main.c
