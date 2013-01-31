@@ -1,4 +1,7 @@
 #include <iostream>
+#include <fstream>
+#define IBPP_LINUX
+#include <ibpp/all_in_one.cpp>
 #include "dbs.h"
 
 using namespace std;
@@ -65,4 +68,77 @@ void Script::changeTerm(void){
 			term = newTerm;
 		}
 	}
+}
+
+//=========================================================================
+// Database
+//=========================================================================
+
+bool Database::disconnect(void){
+	try{
+		if(db->Connected()){
+			db->Disconnect();
+			connected = false;
+		}
+	}
+	catch(IBPP::Exception& e){
+		return false;
+	}
+	return true;
+}
+
+bool Database::connect(const std::string ServerName, const std::string DatabaseName, const std::string UserName, const std::string UserPassword){
+	try{
+		db = IBPP::DatabaseFactory(ServerName, DatabaseName, UserName, UserPassword);
+		db->Connect();
+		connected = true;
+	}
+	catch(IBPP::Exception& e){
+		disconnect();
+		return false;
+	}
+	return true;
+}
+
+//=========================================================================
+// Transaction
+//=========================================================================
+Transaction::Transaction(Database& db, TransactionAccess access){
+	using namespace IBPP;
+	try{
+		switch(access){
+			case taWrite:{
+				tr = TransactionFactory(db.db, amWrite);
+				break;
+			}
+			case taRead:{
+				tr = TransactionFactory(db.db, amRead, ilReadCommitted, lrNoWait);
+				break;
+			}
+		}
+	}
+	catch(Exception& e){
+		tr = NULL;
+	}
+}
+
+bool Transaction::start(void){
+	try{
+		tr->Start();
+	}
+	catch(IBPP::Exception& e){
+		return false;
+	}
+	return true;
+}
+
+bool Transaction::end(void){
+	try{
+		tr->Commit();
+	}
+	catch(IBPP::Exception& e){
+		tr->Rollback();
+		return false;
+	}
+	return true;
 }
