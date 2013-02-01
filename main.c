@@ -23,9 +23,15 @@ int main(int argc, char** argv)
 		std::cout << "Start transaction error\n";
 		return _ERROR_TRANSACTION_START;
 	}
+	Statement st = Statement(trWrite);
 	Script script(filename);
 	while(script.fetch()){
 		std::cout << script.script << "\n";
+		st.setSQL(script.script);
+		if(!st.exec()){
+			std::cout << "Statement error\n";
+			return _ERROR_STATEMENT;
+		}
 	}
 	if(!trWrite.end()){
 		std::cout << "End transaction error\n";

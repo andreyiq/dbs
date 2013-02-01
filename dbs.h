@@ -40,11 +40,25 @@ public:
 	bool connect(const std::string ServerName, const std::string DatabaseName, const std::string UserName, const std::string UserPassword);
 	bool disconnect(void);
 };
+
 class Transaction{
 private:
+	IBPP::Database db;
 	IBPP::Transaction tr;
+	friend class Statement;
 public:
 	bool start(void);
 	bool end(void);
 	Transaction(Database& db, TransactionAccess access);
+};
+
+class Statement{
+private:
+	IBPP::Transaction tr;
+	IBPP::Statement st;
+	string sql;
+public:
+	void setSQL(const std::string sql);
+	bool exec(void);
+	Statement(Transaction& tr);
 };

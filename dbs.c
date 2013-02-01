@@ -105,14 +105,15 @@ bool Database::connect(const std::string ServerName, const std::string DatabaseN
 //=========================================================================
 Transaction::Transaction(Database& db, TransactionAccess access){
 	using namespace IBPP;
+	this->db = db.db;
 	try{
 		switch(access){
 			case taWrite:{
-				tr = TransactionFactory(db.db, amWrite);
+				tr = TransactionFactory(this->db, amWrite);
 				break;
 			}
 			case taRead:{
-				tr = TransactionFactory(db.db, amRead, ilReadCommitted, lrNoWait);
+				tr = TransactionFactory(this->db, amRead, ilReadCommitted, lrNoWait);
 				break;
 			}
 		}
@@ -138,6 +139,29 @@ bool Transaction::end(void){
 	}
 	catch(IBPP::Exception& e){
 		tr->Rollback();
+		return false;
+	}
+	return true;
+}
+
+//=========================================================================
+// Statement
+//=========================================================================
+
+Statement::Statement(Transaction& tr){
+	this->tr = tr.tr;
+	st = IBPP::StatementFactory(tr.db, this->tr);
+}
+
+void Statement::setSQL(const std::string sql){
+	this->sql = sql;
+}
+
+bool Statement::exec(void){
+	try{
+		st->Execute(sql);
+	}
+	catch(IBPP::Exception& e){
 		return false;
 	}
 	return true;
